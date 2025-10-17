@@ -1,5 +1,6 @@
 vendor
 composer.lock
+package-lock.json
 storage
 node_modules
 public/build
