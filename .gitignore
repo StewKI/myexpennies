@@ -1,2 +1,6 @@
 vendor
 composer.lock
+storage
+node_modules
+public/build
+.env
