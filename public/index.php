@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../bootstrap.php';
+$app    = require __DIR__ . '/../bootstrap.php';
+$router = require CONFIG_PATH . '/routes/web.php';
 
-echo $_ENV['DB_HOST'];
+$router($app);
+
+$app->run();
+
+
