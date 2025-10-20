@@ -5,6 +5,9 @@ declare(strict_types=1);
 
 namespace App\Contracts;
 
+use App\Auth;
+use App\DataObjects\RegisterData;
+
 interface AuthInterface
 {
     public function user(): ?UserInterface;
@@ -17,4 +20,8 @@ interface AuthInterface
     ): bool;
 
     public function logout(): void;
+
+    public function register(RegisterData $data): UserInterface;
+
+    public function login(UserInterface $user): void;
 }

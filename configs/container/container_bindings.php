@@ -8,11 +8,13 @@ use App\Config;
 use App\Contracts\AuthInterface;
 use App\Contracts\SessionInterface;
 use App\Contracts\UserProviderServiceInterface;
+use App\Contracts\ValidatorFactoryInterface;
 use App\DataObjects\SessionConfig;
 use App\Enum\AppEnvironment;
 use App\Enum\SameSite;
 use App\Services\UserProviderService;
 use App\Session;
+use App\Validators\ValidatorFactory;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
@@ -33,11 +35,13 @@ use Twig\Extra\Intl\IntlExtension;
 use function DI\create;
 
 return [
-    App::class => function (ContainerInterface $container): App {
+    App::class                          => function (
+        ContainerInterface $container,
+    ): App {
         AppFactory::setContainer($container);
 
         $addMiddleware = require CONFIG_PATH . '/middleware.php';
-        $router = require CONFIG_PATH . '/routes/web.php';
+        $router        = require CONFIG_PATH . '/routes/web.php';
 
         $app = AppFactory::create();
 
@@ -47,10 +51,14 @@ return [
 
         return $app;
     },
-    Config::class        => create(Config::class)->constructor(
+    Config::class                       => create(
+        Config::class,
+    )->constructor(
         require CONFIG_PATH . '/app.php',
     ),
-    EntityManager::class => fn(Config $config) => new EntityManager(
+    EntityManager::class                => fn(Config $config,
+    )
+        => new EntityManager(
         DriverManager::getConnection(
             $config->get('doctrine.connection'),
             ORMSetup::createAttributeMetadataConfiguration(
@@ -63,7 +71,7 @@ return [
             $config->get('doctrine.dev_mode'),
         ),
     ),
-    Twig::class                     => function (
+    Twig::class                         => function (
         Config $config,
         ContainerInterface $container,
     ) {
@@ -80,27 +88,48 @@ return [
                 $container,
             ),
         );
-        $twig->addExtension(new AssetExtension($container->get('webpack_encore.packages')));
+        $twig->addExtension(
+            new AssetExtension($container->get('webpack_encore.packages')),
+        );
 
         return $twig;
     },
-    'webpack_encore.packages'       => fn() => new Packages(
-        new Package(new JsonManifestVersionStrategy(BUILD_PATH . '/manifest.json')),
+    'webpack_encore.packages'           => fn() => new Packages(
+        new Package(
+            new JsonManifestVersionStrategy(BUILD_PATH . '/manifest.json'),
+        ),
     ),
-    'webpack_encore.tag_renderer'   => fn(ContainerInterface $container) => new TagRenderer(
+    'webpack_encore.tag_renderer'       => fn(
+        ContainerInterface $container,
+    )
+        => new TagRenderer(
         new EntrypointLookup(BUILD_PATH . '/entrypoints.json'),
         $container->get('webpack_encore.packages'),
     ),
-    ResponseFactoryInterface::class => fn(App $app) => $app->getResponseFactory(),
-    AuthInterface::class => fn(ContainerInterface $container) => $container->get(Auth::class),
-    UserProviderServiceInterface::class => fn(ContainerInterface $container) => $container->get(UserProviderService::class),
-    SessionInterface::class => fn(Config $config) => new Session(
+    ResponseFactoryInterface::class     => fn(App $app,
+    )
+        => $app->getResponseFactory(),
+    AuthInterface::class                => fn(
+        ContainerInterface $container,
+    )
+        => $container->get(Auth::class),
+    UserProviderServiceInterface::class => fn(
+        ContainerInterface $container,
+    )
+        => $container->get(UserProviderService::class),
+    SessionInterface::class             => fn(Config $config,
+    )
+        => new Session(
         new SessionConfig(
             $config->get('session.name', ''),
             $config->get('session.flashname', 'flash'),
             $config->get('session.secure', true),
             $config->get('session.httponly', true),
             SameSite::from($config->get('session.samesite', 'lax')),
-        )
+        ),
     ),
+    ValidatorFactoryInterface::class    => fn(
+        ContainerInterface $container,
+    )
+        => $container->get(ValidatorFactory::class),
 ];
