@@ -9,6 +9,9 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Slim\App;
+use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\Asset\Package;
@@ -22,6 +25,20 @@ use Twig\Extra\Intl\IntlExtension;
 use function DI\create;
 
 return [
+    App::class => function (ContainerInterface $container): App {
+        AppFactory::setContainer($container);
+
+        $addMiddleware = require CONFIG_PATH . '/middleware.php';
+        $router = require CONFIG_PATH . '/routes/web.php';
+
+        $app = AppFactory::create();
+
+        $router($app);
+
+        $addMiddleware($app);
+
+        return $app;
+    },
     Config::class        => create(Config::class)->constructor(
         require CONFIG_PATH . '/app.php',
     ),
@@ -31,14 +48,14 @@ return [
             ORMSetup::createAttributeMetadataConfiguration(
                 $config->get('doctrine.entity_dir'),
                 $config->get('doctrine.dev_mode'),
-            )
+            ),
         ),
         ORMSetup::createAttributeMetadataConfiguration(
             $config->get('doctrine.entity_dir'),
             $config->get('doctrine.dev_mode'),
-        )
+        ),
     ),
-    Twig::class          => function (
+    Twig::class                     => function (
         Config $config,
         ContainerInterface $container,
     ) {
@@ -59,11 +76,12 @@ return [
 
         return $twig;
     },
-    'webpack_encore.packages'     => fn() => new Packages(
-        new Package(new JsonManifestVersionStrategy(BUILD_PATH . '/manifest.json'))
+    'webpack_encore.packages'       => fn() => new Packages(
+        new Package(new JsonManifestVersionStrategy(BUILD_PATH . '/manifest.json')),
     ),
-    'webpack_encore.tag_renderer' => fn(ContainerInterface $container) => new TagRenderer(
+    'webpack_encore.tag_renderer'   => fn(ContainerInterface $container) => new TagRenderer(
         new EntrypointLookup(BUILD_PATH . '/entrypoints.json'),
-        $container->get('webpack_encore.packages')
+        $container->get('webpack_encore.packages'),
     ),
+    ResponseFactoryInterface::class => fn(App $app) => $app->getResponseFactory(),
 ];
