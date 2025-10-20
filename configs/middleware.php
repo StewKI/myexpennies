@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Config;
+use App\Middleware\AuthenticateMiddleware;
 use App\Middleware\OldFormDataMiddleware;
 use App\Middleware\StartSessionMiddleware;
 use App\Middleware\ValidationErrorsMiddleware;
@@ -15,8 +16,8 @@ return function (App $app) {
     $container = $app->getContainer();
     $config    = $container->get(Config::class);
 
+    $app->add(AuthenticateMiddleware::class);
     $app->add(TwigMiddleware::create($app, $container->get(Twig::class)));
-
     $app->add(ValidationExceptionMiddleware::class);
     $app->add(ValidationErrorsMiddleware::class);
     $app->add(OldFormDataMiddleware::class);

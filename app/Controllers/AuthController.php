@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Contracts\AuthInterface;
 use App\Entity\User;
 use App\Exception\ValidationException;
 use Doctrine\ORM\EntityManager;
@@ -17,6 +18,7 @@ class AuthController
     public function __construct(
         private readonly Twig $twig,
         private readonly EntityManager $entityManager,
+        private readonly AuthInterface $auth,
     ) {}
 
     public function loginView(Request $request, Response $response): Response
@@ -70,5 +72,32 @@ class AuthController
         $this->entityManager->flush();
 
         return $response;
+    }
+
+    public function login(Request $request, Response $response): Response
+    {
+        $data = $request->getParsedBody();
+
+        $v = new Validator($data);
+
+        $v->rule('required', ['email', 'password']);
+        $v->rule('email', 'email');
+
+        if (!$v->validate()) {
+            throw new ValidationException($v->errors());
+        }
+
+        if (! $this->auth->attemptLogin($data)) {
+            throw new ValidationException(['password' => ['Your email or password is incorrect']]);
+        }
+
+        return $response->withHeader('Location', '/')->withStatus(302);
+    }
+
+    public function logout(Request $request, Response $response): Response
+    {
+        $this->auth->logout();
+
+        return $response->withHeader('Location', '/')->withStatus(302);
     }
 }
