@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace App;
 
 use App\Contracts\AuthInterface;
+use App\Contracts\SessionInterface;
 use App\Contracts\UserInterface;
 use App\Contracts\UserProviderServiceInterface;
 use App\Entity\User;
@@ -18,7 +19,10 @@ class Auth implements AuthInterface
 {
     private ?UserInterface $user = null;
 
-    public function __construct(private readonly UserProviderServiceInterface $userProvider) {}
+    public function __construct(
+        private readonly UserProviderServiceInterface $userProvider,
+        private readonly SessionInterface $session,
+    ) {}
 
     public function user(): ?UserInterface
     {
@@ -26,13 +30,13 @@ class Auth implements AuthInterface
             return $this->user;
         }
 
-        $userId = $_SESSION['user'] ?? null;
+        $userId = $this->session->get('user');
 
         if (! $userId) {
             return null;
         }
 
-        $user = $this->userProvider->getById($userId);
+        $user = $this->userProvider->getById((int) $userId);
 
         if (! $user) {
             return null;
@@ -50,8 +54,8 @@ class Auth implements AuthInterface
             return false;
         }
 
-        session_regenerate_id();
-        $_SESSION['user'] = $user->get_id();
+        $this->session->regenerate();
+        $this->session->put('user', $user->get_id());
 
         $this->user = $user;
 
@@ -65,7 +69,8 @@ class Auth implements AuthInterface
 
     public function logout(): void
     {
-        unset($_SESSION['user']);
+        $this->session->regenerate();
+        $this->session->forget('user');
         $this->user = null;
     }
 }
