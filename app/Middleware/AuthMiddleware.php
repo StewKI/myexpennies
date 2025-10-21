@@ -6,18 +6,19 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Contracts\AuthInterface;
-use App\Contracts\SessionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\Views\Twig;
 
 class AuthMiddleware implements MiddlewareInterface
 {
     public function __construct(
         private readonly ResponseFactoryInterface $responseFactory,
         private readonly AuthInterface $auth,
+        private readonly Twig $twig,
     ) {}
 
     public function process(
@@ -27,6 +28,8 @@ class AuthMiddleware implements MiddlewareInterface
         $user = $this->auth->user();
 
         if ($user) {
+            $this->twig->getEnvironment()->addGlobal('auth', ['id' => $user->get_id(), 'name' => $user->get_name()]);
+
             $request = $request->withAttribute('user', $user);
 
             return $handler->handle($request);
