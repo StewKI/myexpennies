@@ -103,6 +103,26 @@
       <path value="$PROJECT_DIR$/vendor/symfony/service-contracts" />
       <path value="$PROJECT_DIR$/vendor/vlucas/valitron" />
       <path value="$PROJECT_DIR$/vendor/slim/csrf" />
+      <path value="$PROJECT_DIR$/vendor/vendor/bin" />
+      <path value="$PROJECT_DIR$/vendor/vendor/composer" />
+      <path value="$PROJECT_DIR$/vendor/vendor/doctrine" />
+      <path value="$PROJECT_DIR$/vendor/vendor/fig" />
+      <path value="$PROJECT_DIR$/vendor/vendor/graham-campbell" />
+      <path value="$PROJECT_DIR$/vendor/vendor/laravel" />
+      <path value="$PROJECT_DIR$/vendor/vendor/myclabs" />
+      <path value="$PROJECT_DIR$/vendor/vendor/nikic" />
+      <path value="$PROJECT_DIR$/vendor/vendor/phar-io" />
+      <path value="$PROJECT_DIR$/vendor/vendor/php-di" />
+      <path value="$PROJECT_DIR$/vendor/vendor/phpoption" />
+      <path value="$PROJECT_DIR$/vendor/vendor/phpunit" />
+      <path value="$PROJECT_DIR$/vendor/vendor/psr" />
+      <path value="$PROJECT_DIR$/vendor/vendor/ralouphie" />
+      <path value="$PROJECT_DIR$/vendor/vendor/sebastian" />
+      <path value="$PROJECT_DIR$/vendor/vendor/slim" />
+      <path value="$PROJECT_DIR$/vendor/vendor/symfony" />
+      <path value="$PROJECT_DIR$/vendor/vendor/vlucas" />
+      <path value="$PROJECT_DIR$/vendor/vendor/twig" />
+      <path value="$PROJECT_DIR$/vendor/vendor/theseer" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1" />

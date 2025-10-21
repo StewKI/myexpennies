@@ -4,32 +4,35 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Traits\HasTimestamps;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\PrePersist;
+use Doctrine\ORM\Mapping\PreUpdate;
 use Doctrine\ORM\Mapping\Table;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 #[Entity, Table(name: "categories")]
+#[HasLifecycleCallbacks]
 class Category
 {
+    use HasTimestamps;
+
     #[Id, Column(options: ["unsigned" => true]), GeneratedValue]
     private int $id;
 
     #[Column]
     private string $name;
 
-    #[Column(name: "created_at")]
-    private \DateTime $createdAt;
-
-    #[Column(name: "updated_at")]
-    private \DateTime $updatedAt;
-
-    #[OneToOne(targetEntity: Transaction::class, mappedBy: "category")]
+    #[OneToMany(targetEntity: Transaction::class, mappedBy: "category")]
     private Collection $transactions;
 
     #[ManyToOne(inversedBy: "categories")]
